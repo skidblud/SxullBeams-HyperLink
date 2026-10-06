@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#08090d">
+  <title>Sxull Hyperlink</title>
+  <style>
+    :root{color-scheme:dark;--bg:#08090d;--panel:rgba(16,17,24,.76);--border:rgba(255,255,255,.10);--text:#f7f7fb;--muted:#a7a9b5;--accent:#ff76b7;--accent2:#ffb4d6}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    body{overflow-x:hidden}
+    .sakura{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+    .petal{position:absolute;top:-8vh;width:11px;height:17px;border-radius:80% 15% 80% 15%;background:linear-gradient(135deg,#ffd4e8,#ff8fc3);opacity:.72;filter:drop-shadow(0 0 5px rgba(255,118,183,.25));animation:fall linear infinite}
+    @keyframes fall{0%{transform:translate3d(0,-12vh,0) rotate(0deg)}50%{transform:translate3d(var(--sway),52vh,0) rotate(180deg)}100%{transform:translate3d(calc(var(--sway) * -1),112vh,0) rotate(360deg)}}
+    .wrap{position:relative;z-index:1;min-height:100vh;display:grid;place-items:center;padding:32px 18px}
+    .card{width:min(680px,100%);padding:42px 34px;border:1px solid var(--border);border-radius:28px;background:var(--panel);backdrop-filter:blur(18px);box-shadow:0 24px 80px rgba(0,0,0,.42)}
+    .brand{text-align:center;margin-bottom:30px}
+    h1{margin:0;font-size:clamp(38px,7vw,62px);letter-spacing:-2.8px;line-height:1}
+    .tagline{margin:12px 0 0;color:var(--muted);font-size:15px}
+    .form{display:grid;gap:12px}
+    input,select,button{font:inherit}
+    input,select{width:100%;border:1px solid var(--border);background:rgba(255,255,255,.055);color:var(--text);border-radius:14px;padding:15px 16px;outline:none}
+    input:focus,select:focus{border-color:rgba(255,118,183,.7);box-shadow:0 0 0 3px rgba(255,118,183,.1)}
+    select option{background:#111219;color:#fff}
+    .row{display:grid;grid-template-columns:1fr 180px;gap:12px}
+    button{border:0;border-radius:14px;padding:15px 18px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#190912;transition:transform .15s ease,filter .15s ease}
+    button:hover{transform:translateY(-1px);filter:brightness(1.05)}
+    button:disabled{opacity:.6;cursor:wait;transform:none}
+    .result{display:none;margin-top:18px;border:1px solid var(--border);border-radius:18px;padding:16px;background:rgba(0,0,0,.2)}
+    .result.show{display:block}
+    .label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 8px}
+    .result-line{display:flex;gap:8px;align-items:center}
+    .value{min-width:0;flex:1;overflow:auto;white-space:nowrap;background:rgba(255,255,255,.045);padding:12px;border-radius:10px}
+    .copy{padding:11px 13px;border-radius:10px;background:rgba(255,255,255,.10);color:var(--text);font-weight:700}
+    .discord{display:block;margin:24px auto 0;width:max-content;max-width:100%;text-decoration:none;color:#fff;border:1px solid var(--border);background:rgba(255,255,255,.055);padding:12px 18px;border-radius:999px;font-weight:700;transition:.15s}
+    .discord:hover{border-color:rgba(255,118,183,.55);transform:translateY(-1px)}
+    footer{text-align:center;color:#6f7280;font-size:12px;margin-top:24px}
+    @media(max-width:620px){.card{padding:30px 18px;border-radius:22px}.row{grid-template-columns:1fr}h1{letter-spacing:-2px}}
+  </style>
+</head>
+<body>
+  <div class="sakura" id="sakura"></div>
+  <main class="wrap">
+    <section class="card">
+      <div class="brand">
+        <h1>Sxull Hyperlink</h1>
+        <p class="tagline">Made for yall niggas</p>
+      </div>
+
+      <form class="form" id="form">
+        <input id="url" type="url" placeholder="https://example.com" autocomplete="url" required>
+        <div class="row">
+          <select id="format" aria-label="Output format">
+            <option value="standard">Standard link</option>
+            <option value="markdown">Markdown</option>
+          </select>
+          <button id="submit" type="submit">Shorten</button>
+        </div>
+      </form>
+
+      <div class="result" id="result">
+        <p class="label">Shortened link</p>
+        <div class="result-line">
+          <div class="value" id="shortUrl"></div>
+          <button class="copy" data-copy="shortUrl" type="button">Copy</button>
+        </div>
+
+        <div id="markdownBlock" style="display:none;margin-top:14px">
+          <p class="label">Markdown</p>
+          <div class="result-line">
+            <div class="value" id="markdown"></div>
+            <button class="copy" data-copy="markdown" type="button">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Replace the href below with your Discord invite when provided. -->
+      <a class="discord" id="discordLink" href="#" target="_blank" rel="noopener noreferrer">Discord</a>
+
+      <footer>Powered by Goo.su · Sxull Hyperlink</footer>
+    </section>
+  </main>
+
+  <script>
+    const sakura = document.getElementById("sakura");
+    for(let i=0;i<28;i++){
+      const p=document.createElement("span");
+      p.className="petal";
+      p.style.left=Math.random()*100+"%";
+      p.style.animationDuration=(8+Math.random()*12)+"s";
+      p.style.animationDelay=(-Math.random()*18)+"s";
+      p.style.setProperty("--sway",(Math.random()*220-110)+"px");
+      p.style.transform="scale("+(0.55+Math.random()*.8)+")";
+      sakura.appendChild(p);
+    }
+
+    const form=document.getElementById("form");
+    const input=document.getElementById("url");
+    const format=document.getElementById("format");
+    const submit=document.getElementById("submit");
+    const result=document.getElementById("result");
+    const shortUrl=document.getElementById("shortUrl");
+    const markdown=document.getElementById("markdown");
+    const markdownBlock=document.getElementById("markdownBlock");
+
+    form.addEventListener("submit",async e=>{
+      e.preventDefault();
+      submit.disabled=true;
+      submit.textContent="Shortening...";
+      result.classList.remove("show");
+      try{
+        const res=await fetch("/api/shorten",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({url:input.value})});
+        const data=await res.json();
+        if(!res.ok) throw new Error(data.error||"Something went wrong.");
+        shortUrl.textContent=data.shortUrl;
+        markdown.textContent=data.markdown;
+        markdownBlock.style.display=format.value==="markdown"?"block":"none";
+        result.classList.add("show");
+      }catch(err){
+        alert(err.message);
+      }finally{
+        submit.disabled=false;
+        submit.textContent="Shorten";
+      }
+    });
+
+    document.querySelectorAll("[data-copy]").forEach(btn=>{
+      btn.addEventListener("click",async()=>{
+        const text=document.getElementById(btn.dataset.copy).textContent;
+        await navigator.clipboard.writeText(text);
+        const old=btn.textContent;
+        btn.textContent="Copied";
+        setTimeout(()=>btn.textContent=old,1200);
+      });
+    });
+
+    format.addEventListener("change",()=>{
+      if(result.classList.contains("show")) markdownBlock.style.display=format.value==="markdown"?"block":"none";
+    });
+  </script>
+</body>
+</html>
